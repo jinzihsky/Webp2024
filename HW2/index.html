@@ -1,0 +1,157 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>景點觀光展覽資訊</title>
+<style>
+table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+td, th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+th {
+  background-color: #04AA6D;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+tr:hover {
+  background-color: #ddd;
+}
+</style>
+</head>
+<body>
+<h1>景點觀光展覽資訊</h1>
+<input type="text" id="Str" placeholder="請輸入關鍵字">
+<table id="hw1" class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>名稱</th>
+      <th>地點</th>
+      <th>票價</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<div id="Page"></div>
+<button onclick="PreData()">上一頁</button>
+<button onclick="NextData()">下一頁</button>
+<input type="text" id="PageInput" placeholder="輸入頁數">
+<button onclick="JumpToPage()">跳頁</button>
+
+<script>
+var openUrl = "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=6";
+var currentPage = 1;
+var pageSize = 10;
+var filteredData = [];
+
+function fetchData(url, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      callback(null, JSON.parse(xhr.responseText));
+    } else {
+      callback(new Error('Failed to fetch data'));
+    }
+  };
+  xhr.onerror = function() {
+    callback(new Error('Failed to fetch data'));
+  };
+  xhr.send();
+}
+
+function addDataToTable(data) {
+  var tableBody = document.getElementById("hw1").getElementsByTagName('tbody')[0];
+  tableBody.innerHTML = '';
+  data.forEach(function(item) {
+    var row = tableBody.insertRow();
+    row.insertCell(0).textContent = item['title'];
+    row.insertCell(1).textContent = item['showInfo'][0]['location'];
+    row.insertCell(2).textContent = item['showInfo'][0]['price'];
+  });
+}
+
+function ShowPage() {
+  var number = document.getElementById('Page');
+  number.textContent = currentPage + "/" + Math.ceil(filteredData.length / pageSize) + "頁";
+}
+
+function PreData() {
+  if (currentPage > 1) {
+    currentPage--;
+    addDataToTable(filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+    ShowPage();
+  }
+}
+
+function NextData() {
+  if (currentPage < Math.ceil(filteredData.length / pageSize)) {
+    currentPage++;
+    addDataToTable(filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+    ShowPage();
+  }
+}
+
+function JumpToPage() {
+  var pageInput = document.getElementById('PageInput').value.trim();
+  if (pageInput === '') return;
+  var pageNumber = parseInt(pageInput);
+  if (isNaN(pageNumber) || pageNumber < 1 || pageNumber > Math.ceil(filteredData.length / pageSize)) {
+    alert('無效的頁數');
+    return;
+  }
+  currentPage = pageNumber;
+  addDataToTable(filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+  ShowPage();
+}
+
+function SearchData() {
+  var keyword = document.getElementById("Str").value.trim().toLowerCase();
+  if (keyword === '') {
+    addDataToTable(filteredData.slice(0, pageSize));
+    ShowPage();
+    return;
+  }
+
+  filteredData = window.dataset.filter(function(item) {
+    var title = item['title'].toLowerCase();
+    var location = item['showInfo'][0]['location'].toLowerCase();
+    var price = item['showInfo'][0]['price'].toLowerCase();
+    return title.includes(keyword) || location.includes(keyword) || price.includes(keyword);
+  });
+
+  currentPage = 1;
+  addDataToTable(filteredData.slice(0, pageSize));
+  ShowPage();
+}
+
+document.getElementById("Str").addEventListener("input", function() {
+  SearchData();
+});
+
+document.getElementById('PageInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    JumpToPage();
+  }
+});
+
+fetchData(openUrl, function(err, data) {
+  if (err) {
+    console.error(err);
+  } else {
+    window.dataset = data;
+    filteredData = data;
+    addDataToTable(filteredData.slice(0, pageSize));
+    ShowPage();
+  }
+});
+</script>
+</body>
+</html>
