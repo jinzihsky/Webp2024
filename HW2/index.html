@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -28,7 +27,7 @@ tr:hover {
 </head>
 <body>
 <h1>景點觀光展覽資訊</h1>
-<input type="text" id="Str" placeholder="請輸入關鍵字">
+<input type="text" id="Str" placeholder="搜尋名稱">
 <table id="hw1" class="table table-striped table-hover">
   <thead>
     <tr>
@@ -124,9 +123,7 @@ function SearchData() {
 
   filteredData = window.dataset.filter(function(item) {
     var title = item['title'].toLowerCase();
-    var location = item['showInfo'][0]['location'].toLowerCase();
-    var price = item['showInfo'][0]['price'] ? item['showInfo'][0]['price'].toLowerCase() : '';
-    return title.includes(keyword) || location.includes(keyword) || price.includes(keyword);
+    return title.includes(keyword);
   });
 
   currentPage = 1;
