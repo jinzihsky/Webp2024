@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -74,7 +75,8 @@ function addDataToTable(data) {
     var row = tableBody.insertRow();
     row.insertCell(0).textContent = item['title'];
     row.insertCell(1).textContent = item['showInfo'][0]['location'];
-    row.insertCell(2).textContent = item['showInfo'][0]['price'];
+    var price = item['showInfo'][0]['price'];
+    row.insertCell(2).textContent = price ? price : '無須購買門票';
   });
 }
 
@@ -123,7 +125,7 @@ function SearchData() {
   filteredData = window.dataset.filter(function(item) {
     var title = item['title'].toLowerCase();
     var location = item['showInfo'][0]['location'].toLowerCase();
-    var price = item['showInfo'][0]['price'].toLowerCase();
+    var price = item['showInfo'][0]['price'] ? item['showInfo'][0]['price'].toLowerCase() : '';
     return title.includes(keyword) || location.includes(keyword) || price.includes(keyword);
   });
 
