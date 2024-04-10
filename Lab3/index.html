@@ -1,1 +1,36 @@
+<html>
+  <body>
+      <button onclick="getImages()">GET IMG</button>
+      <div id='gallery' class="gallery"></div>
 
+      <script>
+          var apiKey = 'ca370d51a054836007519a00ff4ce59e';
+          var recentPhotosUrl = `https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=${apiKey}&per_page=10&format=json&nojsoncallback=1`;
+
+          function getImages() {
+              var xhr = new XMLHttpRequest();
+              xhr.open('GET', recentPhotosUrl, true);
+              xhr.send();
+              xhr.onload = function() {
+                  if (xhr.status === 200) {
+                      var data = JSON.parse(xhr.responseText);
+                      addNewImages(data.photos.photo);
+                  } else {
+                      console.error('fail:', xhr.statusText);
+                  }
+              };
+          }
+
+          function addNewImages(photos) {
+              var gallery = document.getElementById("gallery");
+              gallery.innerHTML = '';
+              photos.forEach(function(photo) {
+                  var imgSrc = `https://live.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_w.jpg`;
+                  var img = document.createElement("img");
+                  img.setAttribute("src", imgSrc);
+                  gallery.appendChild(img);
+              });
+          }
+      </script>
+  </body>
+</html>
